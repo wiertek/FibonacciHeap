@@ -1,0 +1,7 @@
+﻿  Source.cpp
+c:\users\piotr\documents\visual studio 2015\projects\fibonacciheap\fibonacciheap\fibonacciheap.h(148): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+  c:\users\piotr\documents\visual studio 2015\projects\fibonacciheap\fibonacciheap\fibonacciheap.h(147): note: while compiling class template member function 'void FibHeap<int>::consolidate(void)'
+  c:\users\piotr\documents\visual studio 2015\projects\fibonacciheap\fibonacciheap\fibonacciheap.h(214): note: see reference to function template instantiation 'void FibHeap<int>::consolidate(void)' being compiled
+  c:\users\piotr\documents\visual studio 2015\projects\fibonacciheap\fibonacciheap\source.cpp(5): note: see reference to class template instantiation 'FibHeap<int>' being compiled
+  FibonacciHeap.vcxproj -> C:\Users\Piotr\documents\visual studio 2015\Projects\FibonacciHeap\Debug\FibonacciHeap.exe
+  FibonacciHeap.vcxproj -> C:\Users\Piotr\documents\visual studio 2015\Projects\FibonacciHeap\Debug\FibonacciHeap.pdb (Full PDB)
