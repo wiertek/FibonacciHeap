@@ -42,6 +42,7 @@ public:
 		return new h;
 	}
 
+
 	void addToRootList(FibNode<T>* x) {
 		if (min == nullptr) {
 			min = x;
@@ -69,6 +70,16 @@ public:
 		else {
 			min = nullptr;
 		}
+	}
+
+	int getRootCount() {
+		int count = 1;
+		FibNode<T>* x = min->right;
+		while (x != min) {
+			x = x->right;
+			count++;
+		}
+		return count;
 	}
 
 	void insert(T v) {
@@ -131,7 +142,10 @@ public:
 		removeFromRoot(y);
 		if (x->child != nullptr) {
 			y->left = x->child->left;
-			y->right = x->child->right;
+			y->right = x->child;
+		}
+		else {
+			y->right = y->left = y;
 		}
 		x->child = y;
 		if (y->left != nullptr) {
@@ -145,49 +159,60 @@ public:
 	}
 
 	void consolidate() {
-		int max_degree = std::floor(std::log(n) / std::log((1 + std::sqrt(5) / 2.0)));
+		int max_degree = 3 + std::floor(std::log(n) / std::log((1 + std::sqrt(5) / 2.0)));
 		int d;
-		std::vector<FibNode<T>*> A;
-		A.resize(max_degree + 1);
-		std::fill(A.begin(), A.end(), nullptr);
-		FibNode<T> *w, *wO, *x, *y;
-		wO = w = min;
-		do {
+		FibNode<T> **B = (FibNode<T>**)malloc(max_degree*sizeof(FibNode<T>*));
+		for (int i = 0; i < max_degree; i++) {
+			B[i] = nullptr;
+		}
+	//	std::vector<FibNode<T>*> A;
+		//A.resize(max_degree);
+		//std::fill(A.begin(), A.end(), nullptr);
+		FibNode<T> *w, *x, *y, *nextW;
+		int count = getRootCount();
+		w = min;
+		while(count > 0) {
 			x = w;
+			nextW = w->right;
 			d = x->degree;
-			while (A[d] != nullptr) {
-				y = A[d];
+			while(d < max_degree - 1 && B[d] != nullptr) {
+				y = B[d];
 				if (x->key > y->key) {
 					FibNode<T> *tmp = x;
 					x = y;
-					y = tmp;
-				}
-				link(y, x);
-				A[d] = nullptr;
-				d++;
-			}
-			A[d] = x;
-			w = w->right;
-		} while (w != wO);
-		min = nullptr;
-
-		for (int i = 0; i <= max_degree; i++) {
-			if (A[i] != nullptr) {
-				if (min == nullptr) {
-					A[i]->left = A[i]->right = A[i];
-					min = A[i];
+					y = tmp;	
 				}
 				else {
-					min->left->right = A[i];
-					A[i]->left = min->left;
-					A[i]->right = min;
-					min->left = A[i];
-					if (A[i]->key < min->key) {
-						min = A[i];
+				//	count--;
+				}
+				link(y, x);		
+				B[d] = nullptr;
+				d++;
+			}
+			B[d] = x;
+			w = nextW;
+			count--;
+		}
+		min = nullptr;
+
+		for (int i = 0; i < max_degree; i++) {
+			if (B[i] != nullptr) {
+				if (min == nullptr) {
+					B[i]->left = B[i]->right = B[i];
+					min = B[i];
+				}
+				else {
+					min->left->right = B[i];
+					B[i]->left = min->left;
+					B[i]->right = min;
+					min->left = B[i];
+					if (B[i]->key < min->key) {
+						min = B[i];
 					}
 				}
 			}
 		}
+		free(B);
 	}
 
 	FibNode<T>* extractMin() {
@@ -196,12 +221,13 @@ public:
 			FibNode<T>* next = z->child;
 			if (next != nullptr) {
 				FibNode<T>* x = next;
-				while(x != nullptr) {			
+				FibNode<T>* initiial = x;
+				do {			
 					next = next->right;
 					addToRootList(x);
 					x->p = nullptr;
 					x = next;
-				} 
+				} while (x != initiial);
 			}
 				
 			removeFromRoot(z);
@@ -217,8 +243,6 @@ public:
 		}
 		return z;
 	}
-
-
 
 	void cut(FibNode<T>* x, FibNode<T>* y) {
 		if (x->left != nullptr) {
