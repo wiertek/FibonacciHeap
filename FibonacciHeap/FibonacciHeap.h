@@ -3,31 +3,36 @@
 #include <vector>
 #include <algorithm>
 
-template<typename T>
-class FibNode
-{
-public:
-	FibNode(T key)
-		:key(key), mark(false), p(nullptr), left(this), right(this), child(nullptr), degree(-1)
-	{
-	}
-
-	~FibNode()
-	{
-	}
-
-	T key;
-	FibNode *p;
-	FibNode *left;
-	FibNode *right;
-	FibNode *child;
-	int degree;
-	bool mark;
-};
+#define NODE FibNode<T>*
+#define HEAP FibHeap<T>* 
 
 template<typename T>
 class FibHeap
 {
+	template<typename T>
+	class FibNode
+	{
+		friend FibHeap;
+		FibNode(T key)
+			:key(key), mark(false), p(nullptr), left(this), right(this), child(nullptr), degree(-1)
+		{
+		}
+
+		~FibNode()
+		{
+		}
+	public:
+		T key;
+	private:
+		FibNode *p;
+		FibNode *left;
+		FibNode *right;
+		FibNode *child;
+		int degree;
+		bool mark;
+	};
+
+private:
 	int n; //number of nodes
 	FibNode<T>* min; //node with minimum value
 
@@ -37,12 +42,8 @@ public:
 
 	}
 
-	static FibHeap* makeHeap() {
-		FibHeap* h = new FibHeap<T>()
-		return new h;
-	}
 
-
+private:
 	void addToRootList(FibNode<T>* x) {
 		if (min == nullptr) {
 			min = x;
@@ -82,7 +83,8 @@ public:
 		return count;
 	}
 
-	void insert(T v) {
+public:
+	NODE insert(T v) {
 		FibNode<T>* x = new FibNode<T>(v);
 		x->degree = 0;
 		x->p = nullptr;
@@ -102,27 +104,10 @@ public:
 			}
 		}
 		n++;
+		return x;
 	}
 
-	void insert(FibNode<T>* x) {
-		x->degree = 0;
-		x->p = nullptr;
-		x->child = nullptr;
-		x->mark = false;
-		if (min == nullptr) {
-			min = x->left = x->right = x;
-		}
-		else {
-			addToRootList(x);
-			if (x->key < min->key)
-			{
-				min = x;
-			}
-		}
-		n++;
-	}
-
-	FibHeap* heapUnion(FibHeap* h1, FibHeap* h2) {
+	HEAP heapUnion(HEAP h1, HEAP h2) {
 		FibHeap *h = makeHeap();
 		h.min = h1->min;
 		FibNode* temp1 = h1->min->right;
@@ -138,6 +123,7 @@ public:
 		return h;
 	}
 
+private:
 	void link(FibNode<T>* y, FibNode<T>* x) {
 		removeFromRoot(y);
 		if (x->child != nullptr) {
@@ -159,15 +145,12 @@ public:
 	}
 
 	void consolidate() {
-		int max_degree = 3 + std::floor(std::log(n) / std::log((1 + std::sqrt(5) / 2.0)));
+		int max_degree =  std::floor(std::log(n) / std::log((1 + std::sqrt(5))/ 2.0));
 		int d;
 		FibNode<T> **B = (FibNode<T>**)malloc(max_degree*sizeof(FibNode<T>*));
 		for (int i = 0; i < max_degree; i++) {
 			B[i] = nullptr;
 		}
-	//	std::vector<FibNode<T>*> A;
-		//A.resize(max_degree);
-		//std::fill(A.begin(), A.end(), nullptr);
 		FibNode<T> *w, *x, *y, *nextW;
 		int count = getRootCount();
 		w = min;
@@ -181,9 +164,6 @@ public:
 					FibNode<T> *tmp = x;
 					x = y;
 					y = tmp;	
-				}
-				else {
-				//	count--;
 				}
 				link(y, x);		
 				B[d] = nullptr;
@@ -215,7 +195,8 @@ public:
 		free(B);
 	}
 
-	FibNode<T>* extractMin() {
+public:
+	NODE extractMin() {
 		FibNode<T>* z = min;
 		if (z != nullptr) {
 			FibNode<T>* next = z->child;
@@ -244,6 +225,7 @@ public:
 		return z;
 	}
 
+private:
 	void cut(FibNode<T>* x, FibNode<T>* y) {
 		if (x->left != nullptr) {
 			x->left->right = x->right;
@@ -277,7 +259,8 @@ public:
 		}
 	}
 
-	void decreaseKey(FibNode<T>* x, T k) {
+public:
+	NODE decreaseKey(NODE x, T k) {
 		if (k > x->key) {
 			return; //ERROR
 		}
@@ -290,9 +273,14 @@ public:
 		if (x->key < min->key) {
 			min = x;
 		}
+		return x;
 	}
 
-	void remove(FibNode<T>* x, T min) {
+	NODE getMin() {
+		return min;
+	}
+
+	void remove(NODE x) {
 		decreaseKey(x, min);
 		extractMin();
 	}
